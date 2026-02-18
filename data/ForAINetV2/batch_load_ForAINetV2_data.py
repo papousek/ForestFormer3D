@@ -61,7 +61,7 @@ def export_one_scan(
     export_func,
     test_mode=False,
 ):
-    ply_file = osp.join(forainetv2_dir, scan_name + ".ply")
+    laz_file = osp.join(forainetv2_dir, scan_name + ".laz")
     (
         mesh_vertices,
         semantic_labels,
@@ -70,7 +70,7 @@ def export_one_scan(
         aligned_bboxes,
         axis_align_matrix,
         offsets,
-    ) = export_func(ply_file, None, test_mode)
+    ) = export_func(laz_file, None, test_mode)
 
     if not test_mode:
         mask = np.logical_not(np.in1d(semantic_labels, DONOTCARE_CLASS_IDS))
