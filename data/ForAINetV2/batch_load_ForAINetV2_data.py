@@ -139,8 +139,8 @@ def batch_export(
                 export_func,
                 test_mode,
             )
-        except Exception:
-            print(f"Failed export scan: {scan_name}")
+        except Exception as e:
+            print(f"Failed export scan: {scan_name}: {e}")
         print("-" * 20 + "done")
 
 
