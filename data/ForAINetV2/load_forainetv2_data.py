@@ -11,10 +11,20 @@ import inspect
 import json
 import os
 
+import laspy
 import numpy as np
 from plyutils import read_ply
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+
+
+def read_laz(filename):
+    data = laspy.read(filename)
+    return {
+        "x": data.x,
+        "y": data.y,
+        "z": data.z,
+    }
 
 
 def read_aggregation(filename):
@@ -89,11 +99,11 @@ def extract_bbox(mesh_vertices, label_ids, instance_ids, bg_sem=np.array([0])):
     return instance_bboxes
 
 
-def export(ply_file, output_file=None, test_mode=False):
+def export(laz_file, output_file=None, test_mode=False):
     """Export original files to vert, ins_label, sem_label and bbox file.
 
     Args:
-        ply_file (str): Path of the ply_file.
+        laz_file (str): Path of the laz file.
         output_file (str): Path of the output folder.
             Default: None.
         test_mode (bool): Whether is generating test data without labels.
@@ -107,19 +117,12 @@ def export(ply_file, output_file=None, test_mode=False):
         dict: Map from object_id to label_id.
     """
 
-    # from plyfile import PlyData, PlyElement
-    # def read_ply(filename):
-    #    """Read a PLY file and return its contents as a dictionary."""
-    #    ply_data = PlyData.read(filename)
-    #    data = ply_data['vertex'].data
-    #    return {key: data[key] for key in data.dtype.names}
-
-    pcd = read_ply(ply_file)
+    pcd = read_laz(laz_file)
     # points = np.vstack((pcd['x'], pcd['y'], pcd['z'])).astype(np.float32).T
 
     points = np.vstack((pcd["x"], pcd["y"], pcd["z"])).astype(np.float64).T
 
-    is_blue = "bluepoints" in os.path.basename(ply_file)
+    is_blue = "bluepoints" in os.path.basename(laz_file)
 
     if is_blue:
         offsets = np.zeros(3, dtype=np.float64)
