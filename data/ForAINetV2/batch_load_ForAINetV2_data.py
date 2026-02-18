@@ -16,13 +16,6 @@ import os
 from os import path as osp
 
 import numpy as np
-import open3d as o3d
-import torch
-from load_forainetv2_data import export
-from plyutils import read_ply
-from scipy.spatial import Delaunay
-
-import segmentator
 
 DONOTCARE_CLASS_IDS = np.array([])
 
