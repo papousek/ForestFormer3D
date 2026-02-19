@@ -1,31 +1,33 @@
-import torch
-import torch.nn.functional as F
-import spconv.pytorch as spconv
-from torch_scatter import scatter_mean, scatter_add
-import MinkowskiEngine as ME
-
-from mmdet3d.registry import MODELS
-from mmdet3d.structures import PointData
-from mmdet3d.models import Base3DDetector
-from .mask_matrix_nms import mask_matrix_nms
-import open3d as o3d
-import os
-import numpy as np
-from tools.base_modules import Seq, MLP, FastBatchNorm1d
-from .panoptic_losses import offset_loss, discriminative_loss, FastFocalLoss
-from torch_cluster import fps
-import re
+import collections
+import contextlib
+import gc
 import math
-import collections 
-
+import os
+import re
+import time
 # This is the full refactored version using ThreadPoolExecutor for parallel region inference
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import gc
-from tqdm import tqdm
-from sklearn.neighbors import NearestNeighbors
-from plyfile import PlyData, PlyElement
 
-import contextlib, time
+import MinkowskiEngine as ME
+import numpy as np
+import open3d as o3d
+import spconv.pytorch as spconv
+import torch
+import torch.nn.functional as F
+from mmdet3d.models import Base3DDetector
+from mmdet3d.registry import MODELS
+from mmdet3d.structures import PointData
+from plyfile import PlyData, PlyElement
+from sklearn.neighbors import NearestNeighbors
+from torch_cluster import fps
+from torch_scatter import scatter_add, scatter_mean
+from tqdm import tqdm
+
+from tools.base_modules import MLP, FastBatchNorm1d, Seq
+
+from .mask_matrix_nms import mask_matrix_nms
+from .panoptic_losses import FastFocalLoss, discriminative_loss, offset_loss
+
 
 class UnionFind:
     def __init__(self, n):
@@ -457,6 +459,7 @@ class ScanNetOneFormer3D(ScanNetOneFormer3DMixin, Base3DDetector):
             data_sample.pred_pts_seg = results_list[i]
         #return batch_data_samples
         import os
+
         import numpy as np
         import open3d as o3d
 
@@ -703,8 +706,8 @@ class ForAINetV2OneFormer3D(Base3DDetector):
         #if 'val' in lidar_path:
         if 'test' in lidar_path:
             import numpy as np
-            from sklearn.neighbors import NearestNeighbors
             from plyfile import PlyData, PlyElement
+            from sklearn.neighbors import NearestNeighbors
             from tqdm import tqdm
             step_size = self.radius
             grid_size = 0.2
@@ -2098,8 +2101,8 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         #if 'val' in lidar_path:
         if 'test' in lidar_path:
             import numpy as np
-            from sklearn.neighbors import NearestNeighbors
             from plyfile import PlyData, PlyElement
+            from sklearn.neighbors import NearestNeighbors
             from tqdm import tqdm
             step_size = self.radius
             grid_size = 0.2
