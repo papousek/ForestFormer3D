@@ -6,8 +6,11 @@ import os.path as osp
 import torch
 from mmdet3d.utils import replace_ceph_backend
 from mmengine.config import Config, ConfigDict, DictAction
+from mmengine.logging.history_buffer import HistoryBuffer
 from mmengine.registry import RUNNERS
 from mmengine.runner import Runner
+
+torch.serialization.add_safe_globals([HistoryBuffer])
 
 
 # TODO: support fuse_conv_bn and format_only
@@ -135,7 +138,7 @@ def main():
         )
 
     print("Applying spconv checkpoint fix in-memory...")
-    checkpoint = torch.load(args.checkpoint, map_location="cpu")
+    checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
 
     key_to_fix = "state_dict"
     if key_to_fix not in checkpoint:
