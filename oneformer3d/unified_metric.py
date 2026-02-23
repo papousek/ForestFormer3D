@@ -10,6 +10,21 @@ from .instance_seg_eval import instance_seg_eval
 
 
 @METRICS.register_module()
+class EmptyMetric(SegMetric):
+    """Empty metric that returns an empty dict. Used for testing."""
+
+    def compute_metrics(self, results):
+        """Compute the metrics from processed results.
+        Args:
+            results (list): The processed results of each batch.
+        Returns:
+            Dict[str, float]: The computed metrics. The keys are the names of
+                the metrics, and the values are corresponding results.
+        """
+        return dict()
+
+
+@METRICS.register_module()
 class UnifiedSegMetric(SegMetric):
     """Metric for instance, semantic, and panoptic evaluation.
     The order of classes must be [stuff classes, thing classes, unlabeled].
