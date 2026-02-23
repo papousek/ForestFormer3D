@@ -2278,7 +2278,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         if 'test' in lidar_path:
             step_size = self.radius/4
             grid_size = 0.2
-            num_points = 640000
+            num_points = self.num_points
             pts_semantic_gt = batch_data_samples[0].eval_ann_info['pts_semantic_mask']
             pts_instance_gt = batch_data_samples[0].eval_ann_info['pts_instance_mask']
             original_points = batch_inputs_dict['points'][0]
