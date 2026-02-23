@@ -1767,7 +1767,9 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
                  radius = 16,
                  score_th = 0.4,
                  chunk = 20_000,
-                 num_points=640_000):
+                 num_points=640_000,
+                 save_format='ply',
+        ):
         super(Base3DDetector, self).__init__(
             data_preprocessor=data_preprocessor, init_cfg=init_cfg)
         self.unet = MODELS.build(backbone)
@@ -1790,6 +1792,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         self.score_th = score_th
         self.chunk = chunk
         self.num_points = num_points
+        self.save_format = save_format
         self.BiSemantic = (
             Seq()  
             .append(MLP([num_channels, num_channels], bias=False))  
@@ -2574,10 +2577,14 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
             t14 = time.time()                 
             ######print(f"postprocessing 8: {(t14 - t13)*1000:.0f} ms")
             # Save the final combined results
-            region_path = os.path.join(output_path, f"{current_filename}.ply")
- 
-            self.save_ply_withscore(original_points.cpu().numpy(), final_semantic_labels, clean_all_pre_ins, merged_instance_scores, region_path, pts_semantic_gt, pts_instance_gt)
-            #self.save_bluepoints(original_points.cpu().numpy(), final_semantic_labels, clean_all_pre_ins, merged_instance_scores, region_path, pts_semantic_gt, pts_instance_gt)
+            if self.save_format == 'ply':
+                region_path = os.path.join(output_path, f"{current_filename}_final_results.ply")
+                self.save_ply_withscore(original_points.cpu().numpy(), final_semantic_labels, clean_all_pre_ins, global_instance_scores, region_path, pts_semantic_gt, pts_instance_gt)
+            elif self.save_format == 'laz':
+                region_path = os.path.join(output_path, f"{current_filename}_final_results.laz")
+                self.save_laz_withscore(original_points.cpu().numpy(), final_semantic_labels, clean_all_pre_ins, global_instance_scores, region_path, pts_semantic_gt, pts_instance_gt)
+            else:
+                raise ValueError(f"Unsupported save format: {self.save_format}")
             
             t15 = time.time()                 
             ######print(f"postprocessing 9: {(t15 - t14)*1000:.0f} ms")
@@ -3739,6 +3746,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
 
     @staticmethod
     def save_ply_withscore(points, semantic_pred, instance_pred, scores, filename, semantic_gt=None, instance_gt=None):
+        print(f'Saving PLY file with scores: {filename}')
         from plyfile import PlyData, PlyElement
         output_dir = os.path.dirname(filename)
         os.makedirs(output_dir, exist_ok=True)
@@ -3756,6 +3764,26 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
 
         el = PlyElement.describe(vertex, 'vertex')
         PlyData([el], text=True).write(filename)
+
+    @staticmethod
+    def save_laz_withscore(points, semantic_pred, instance_pred, scores, filename, semantic_gt=None, instance_gt=None):
+        print(f'Saving LAZ file with scores: {filename}')
+        import laspy
+        header = laspy.LasHeader(version="1.4", point_format=6)
+        header.scales = np.array([0.001, 0.001, 0.001])
+        header.offsets = np.floor(np.min(points, axis=0))
+        las = laspy.LasData(header)
+        instance_dim = laspy.ExtraBytesParams(
+            name="instance_segmentation",
+            type=np.int32,
+            description="Instance segmentation",
+        )
+        las.add_extra_dim(instance_dim)
+        las.x = points[:, 0]
+        las.y = points[:, 1]
+        las.z = points[:, 2]
+        las.classification = semantic_pred
+        las.write(filename)
 
     @staticmethod
     def save_bluepoints(points, semantic_pred, instance_pred, scores, filename, semantic_gt=None, instance_gt=None):
