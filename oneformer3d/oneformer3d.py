@@ -1766,7 +1766,8 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
                  #prepare_epoch2=None,
                  radius = 16,
                  score_th = 0.4,
-                 chunk = 20_000):
+                 chunk = 20_000,
+                 num_points=640_000):
         super(Base3DDetector, self).__init__(
             data_preprocessor=data_preprocessor, init_cfg=init_cfg)
         self.unet = MODELS.build(backbone)
@@ -1788,6 +1789,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         self.radius = radius
         self.score_th = score_th
         self.chunk = chunk
+        self.num_points = num_points
         self.BiSemantic = (
             Seq()  
             .append(MLP([num_channels, num_channels], bias=False))  
@@ -2106,7 +2108,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
             from tqdm import tqdm
             step_size = self.radius
             grid_size = 0.2
-            num_points = 640000
+            num_points = self.num_points
             pts_semantic_gt = batch_data_samples[0].eval_ann_info['pts_semantic_mask']
             pts_instance_gt = batch_data_samples[0].eval_ann_info['pts_instance_mask']
             original_points = batch_inputs_dict['points'][0]
