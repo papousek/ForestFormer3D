@@ -10,6 +10,7 @@ import argparse
 import inspect
 import json
 import os
+from pathlib import Path
 
 import laspy
 import numpy as np
@@ -99,11 +100,11 @@ def extract_bbox(mesh_vertices, label_ids, instance_ids, bg_sem=np.array([0])):
     return instance_bboxes
 
 
-def export(laz_file, output_file=None, test_mode=False):
+def export(points_file, output_file=None, test_mode=False):
     """Export original files to vert, ins_label, sem_label and bbox file.
 
     Args:
-        laz_file (str): Path of the laz file.
+        points_file (str): Path of the laz/ply file.
         output_file (str): Path of the output folder.
             Default: None.
         test_mode (bool): Whether is generating test data without labels.
@@ -116,13 +117,18 @@ def export(laz_file, output_file=None, test_mode=False):
         np.ndarray: Instance bboxes.
         dict: Map from object_id to label_id.
     """
-
-    pcd = read_laz(laz_file)
+    points_path = Path(points_file)
+    if points_path.suffix in {".laz", ".las"}:
+        pcd = read_laz(points_file)
+    elif points_path.suffix in {".ply"}:
+        pcd = read_ply(points_file)
+    else:
+        raise ValueError(f"Unsupported file format: {points_path.suffix}")
     # points = np.vstack((pcd['x'], pcd['y'], pcd['z'])).astype(np.float32).T
 
     points = np.vstack((pcd["x"], pcd["y"], pcd["z"])).astype(np.float64).T
 
-    is_blue = "bluepoints" in os.path.basename(laz_file)
+    is_blue = "bluepoints" in os.path.basename(points_file)
 
     if is_blue:
         offsets = np.zeros(3, dtype=np.float64)

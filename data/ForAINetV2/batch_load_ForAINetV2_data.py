@@ -54,7 +54,14 @@ def export_one_scan(
     export_func,
     test_mode=False,
 ):
-    laz_file = osp.join(forainetv2_dir, scan_name + ".laz")
+    for ext in {".laz", ".ply", ".las"}:
+        points_file = osp.join(forainetv2_dir, scan_name + ext)
+        if osp.isfile(points_file):
+            break
+    else:
+        raise FileNotFoundError(
+            f"Cannot find points file for scan: {scan_name} in {forainetv2_dir}"
+        )
     (
         mesh_vertices,
         semantic_labels,
@@ -63,7 +70,7 @@ def export_one_scan(
         aligned_bboxes,
         axis_align_matrix,
         offsets,
-    ) = export_func(laz_file, None, test_mode)
+    ) = export_func(points_file, None, test_mode)
 
     if not test_mode:
         mask = np.logical_not(np.in1d(semantic_labels, DONOTCARE_CLASS_IDS))
