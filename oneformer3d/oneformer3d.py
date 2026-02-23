@@ -1769,6 +1769,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
                  chunk = 20_000,
                  num_points=640_000,
                  save_format='ply',
+                 is_test=False,
         ):
         super(Base3DDetector, self).__init__(
             data_preprocessor=data_preprocessor, init_cfg=init_cfg)
@@ -1793,6 +1794,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         self.chunk = chunk
         self.num_points = num_points
         self.save_format = save_format
+        self.is_test = is_test
         self.BiSemantic = (
             Seq()  
             .append(MLP([num_channels, num_channels], bias=False))  
@@ -2104,7 +2106,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         base_name = os.path.basename(lidar_path)
         current_filename = os.path.splitext(base_name)[0]
         #if 'val' in lidar_path:
-        if 'test' in lidar_path:
+        if self.is_test or 'test' in lidar_path:
             import numpy as np
             from plyfile import PlyData, PlyElement
             from sklearn.neighbors import NearestNeighbors
@@ -2275,7 +2277,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         #########print(f"load pc: {(t1 - t0)*1000:.0f} ms")
         #is_test = True
         #if is_test:
-        if 'test' in lidar_path:
+        if self.is_test or 'test' in lidar_path:
             step_size = self.radius/4
             grid_size = 0.2
             num_points = self.num_points
