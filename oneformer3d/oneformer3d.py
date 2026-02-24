@@ -3785,6 +3785,7 @@ class ForAINetV2OneFormer3D_XAwarequery(Base3DDetector):
         las.y = points[:, 1]
         las.z = points[:, 2]
         las.classification = semantic_pred
+        las["instance_segmentation"] = instance_pred
         las.write(filename)
 
     @staticmethod
