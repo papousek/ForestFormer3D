@@ -47,7 +47,9 @@ def parse_args():
 
 
 def prepare_data(data: list[Path] | None):
-    data_names = [d.stem for d in data] if data is not None else []
+    if data is None:
+        data = []
+    data_names = [d.stem for d in data]
     print("-" * 100)
     print("Preparing data")
     print("-" * 100)
