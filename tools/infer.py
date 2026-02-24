@@ -111,6 +111,9 @@ def segmentation(
     max_points: int,
     chunk_size: int,
 ):
+    print("-" * 100)
+    print("Running segmentation")
+    print("-" * 100)
     work_dir.mkdir(exist_ok=True, parents=True)
     cfg = Config.fromfile(REPO_DIR / "configs" / "entrypoint_inference.py")
     cfg.load_from = checkpoint
