@@ -26,6 +26,7 @@ def parse_args():
         "--work-dir",
         type=Path,
         help="the directory to save the file containing evaluation metrics",
+        default=Path("work_dirs/entrypoint_inference"),
     )
     parser.add_argument(
         "--data",
