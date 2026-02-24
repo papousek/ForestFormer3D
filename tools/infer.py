@@ -28,11 +28,6 @@ def parse_args():
         help="the directory to save the file containing evaluation metrics",
     )
     parser.add_argument(
-        "--device",
-        type=int,
-        default=0,
-    )
-    parser.add_argument(
         "--data",
         "-d",
         nargs="+",
@@ -48,13 +43,11 @@ def parse_args():
     parser.add_argument("--radius", type=int, default=16)
     parser.add_argument("--chunk-size", type=int, default=20_000)
     args = parser.parse_args()
-    if "LOCAL_RANK" not in os.environ:
-        os.environ["LOCAL_RANK"] = str(args.device)
     return args
 
 
-def prepare_data(data: list[Path]):
-    data_names = [d.stem for d in data]
+def prepare_data(data: list[Path] | None):
+    data_names = [d.stem for d in data] if data is not None else []
     print("-" * 100)
     print("Preparing data")
     print("-" * 100)
@@ -114,10 +107,10 @@ def segmentation(
     radius: int,
     max_points: int,
     chunk_size: int,
-    device_rank: int = 0,
 ):
     work_dir.mkdir(exist_ok=True, parents=True)
     cfg = Config.fromfile(REPO_DIR / "configs" / "entrypoint_inference.py")
+    cfg.load_from = checkpoint
     cfg.work_dir = str(work_dir.resolve())
     cfg.model.test_cfg["output_dir"] = cfg.work_dir
     cfg.model.chunk = chunk_size
@@ -137,5 +130,4 @@ if __name__ == "__main__":
         args.radius,
         args.max_points,
         args.chunk_size,
-        device_rank=args.device,
     )
