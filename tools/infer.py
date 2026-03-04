@@ -56,7 +56,7 @@ def prepare_data(data: list[Path] | None):
     print("-" * 100)
     meta_data_dir = REPO_DIR / "data" / "ForAINetV2" / "meta_data"
     with open(meta_data_dir / "test_list.txt", "w") as f:
-        f.writelines(data_names)
+        f.writelines([f"{d}\n" for d in data_names])
     with open(meta_data_dir / "train_list.txt", "w") as f:
         pass
     with open(meta_data_dir / "val_list.txt", "w") as f:
